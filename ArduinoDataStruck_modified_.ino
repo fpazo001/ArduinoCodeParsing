@@ -1,4 +1,7 @@
 #include <Servo.h>
+#include <SPI.h>
+#include <Ethernet.h>
+
 Servo myservo;
 Servo myservo1;
 
@@ -18,8 +21,16 @@ int ind2;
 int x;
 int y;
 
+byte mac[] = {0x90, 0xA2, 0xDA, 0x0f, 0x25, 0xE7};
+byte ip[] = {192,168,111,113};
+
+EthernetServer server = EthernetServer(23);
+
+
 void setup()
 {
+  Ethernet.begin(mac,ip); // init EthernetShield
+  delay(1000);
   Serial.begin(9600);
   pinMode(pin, OUTPUT);
   myservo.attach(pin);
@@ -32,11 +43,13 @@ void loop()
   String newPosition;
   String newPosition1;
 
+  EthernetClient client = server.available();
+  
 
   //------------------------------------------------------------------PARSING------------------------------------------------------------------------------------
 
-  if (Serial.available())  {
-    char c = Serial.read();  //gets one byte from serial buffer
+  if (server.available())  {
+    char c = client.read();  //gets one byte from serial buffer
     if (c == '*') {
      
       ind0 = readString.indexOf(',');  //finds location of first ,
@@ -61,7 +74,7 @@ void loop()
   }
 
 
-  //--------------------------------------------------------------------SERVO 1--------------------------------------------------------------------------------------
+  //-----------------------------------------------------------------------SERVO 1--------------------------------------------------------------------------------------
   
    
     for (; CurrentPosition < x; CurrentPosition++)
@@ -77,7 +90,7 @@ void loop()
     }
   
 
-  //-------------------------------------------------------------------------SERVO2MOVEMNET------------------------------------------------------------------
+  //-----------------------------------------------------------------------SERVO2------------------------------------------------------------------
   
    
     for (; CurrentPosition0 < y; CurrentPosition0++)
